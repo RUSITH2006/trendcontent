@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Header from './components/Header';
+import LoginPage from './components/LoginPage';
 import FloorMapCanvas from './components/FloorMapCanvas';
 import FaultInjectorPanel from './components/FaultInjectorPanel';
 import RecommendationsTab from './components/RecommendationsTab';
@@ -13,6 +14,9 @@ import { BaselineStreamEngine, RobustStreamEngine, generateSyntheticTelemetryBat
 import { analyzeBranchCoverage, generateRecommendations } from './engine/recommendationEngine';
 
 export default function App() {
+  // Auth state
+  const [currentUser, setCurrentUser] = useState(null);
+
   const [selectedBranchId, setSelectedBranchId] = useState('branch_a_downtown');
   const [activeTab, setActiveTab] = useState('canvas');
 
@@ -51,7 +55,7 @@ export default function App() {
   useEffect(() => {
     let timer = null;
 
-    if (isStreaming) {
+    if (currentUser && isStreaming) {
       timer = setInterval(() => {
         const batch = generateSyntheticTelemetryBatch(currentBranch, 3, faultConfig);
 
@@ -89,7 +93,7 @@ export default function App() {
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [isStreaming, currentBranch, faultConfig]);
+  }, [currentUser, isStreaming, currentBranch, faultConfig]);
 
   const handleResetStream = () => {
     baselineEngineRef.current.reset();
@@ -106,6 +110,17 @@ export default function App() {
     });
   };
 
+  const handleLogout = () => {
+    setIsStreaming(false);
+    handleResetStream();
+    setCurrentUser(null);
+  };
+
+  // If user is not authenticated, display full-screen Login Page
+  if (!currentUser) {
+    return <LoginPage onLoginSuccess={(user) => setCurrentUser(user)} />;
+  }
+
   return (
     <div className="app-container">
       <Header 
@@ -113,6 +128,8 @@ export default function App() {
         onSelectBranch={(id) => { setSelectedBranchId(id); handleResetStream(); }}
         activeTab={activeTab}
         onSelectTab={setActiveTab}
+        currentUser={currentUser}
+        onLogout={handleLogout}
       />
 
       <main style={{ flex: 1 }}>

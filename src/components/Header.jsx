@@ -1,8 +1,8 @@
 import React from 'react';
-import { Wifi, Activity, ShieldCheck, Cpu, BarChart3, Code2, FileText, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Wifi, Activity, ShieldCheck, Cpu, BarChart3, Code2, FileText, LogOut, User } from 'lucide-react';
 import { BRANCH_PRESETS } from '../data/branchPresets';
 
-export default function Header({ selectedBranchId, onSelectBranch, activeTab, onSelectTab }) {
+export default function Header({ selectedBranchId, onSelectBranch, activeTab, onSelectTab, currentUser, onLogout }) {
   const currentBranch = BRANCH_PRESETS.find(b => b.id === selectedBranchId) || BRANCH_PRESETS[0];
 
   return (
@@ -37,6 +37,60 @@ export default function Header({ selectedBranchId, onSelectBranch, activeTab, on
           <span className="status-dot"></span>
           <span>WAN LINK: {currentBranch.wanLinkStatus} ({currentBranch.bandwidthMbps} Mbps)</span>
         </div>
+
+        {currentUser && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem',
+            background: 'rgba(0,0,0,0.3)',
+            padding: '0.35rem 0.75rem',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border-subtle)'
+          }}>
+            <div style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, var(--primary), var(--accent-cyan))',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: '0.75rem',
+              fontWeight: 700
+            }}>
+              {currentUser.avatar || 'US'}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'white', lineHeight: '1.1' }}>
+                {currentUser.name}
+              </span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                {currentUser.roleTitle || currentUser.role}
+              </span>
+            </div>
+
+            <button
+              onClick={onLogout}
+              title="Sign Out"
+              style={{
+                background: 'rgba(244, 63, 94, 0.15)',
+                border: 'none',
+                color: '#fecdd3',
+                padding: '0.35rem',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                marginLeft: '0.2rem',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              <LogOut size={14} />
+            </button>
+          </div>
+        )}
       </div>
 
       <nav className="nav-tabs">
